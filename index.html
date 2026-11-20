@@ -20,10 +20,20 @@
 
   <div class="page-wrapper">
 
-   
-
     <!-- The resume itself. JavaScript fills this container automatically. -->
     <article id="resume" class="resume theme-1" aria-label="Student resume"></article>
+
+    <!-- SCREEN-ONLY AREA (placed at the bottom): the button and the warning are hidden when printing -->
+    <div class="toolbar no-print">
+      <button id="printButton" class="print-button" type="button">Download Resume</button>
+
+      <!-- Shown automatically only when the resume is longer than one A4 page -->
+      <p id="pageWarning" class="page-warning" role="alert" hidden>
+        Warning: your resume is longer than one A4 page. Please shorten some text
+        (for example, remove a project or shorten descriptions) before printing.
+        Nothing has been hidden or cut.
+      </p>
+    </div>
 
   </div>
 
