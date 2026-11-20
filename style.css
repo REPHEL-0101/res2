@@ -96,7 +96,7 @@ body {
 
 .toolbar {
   max-width: 210mm;
-  margin: 0 auto 12px;
+  margin: 16px auto 0;
   text-align: center;
 }
 
