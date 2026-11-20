@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<!--
+  STUDENT RESUME WEBSITE
+  Only TWO files are needed: index.html (this file) and style.css (same folder).
+  You only need to edit the two clearly marked parts inside the <script> tag below:
+    1. SELECTED_THEME
+    2. student (your personal information)
+  Do NOT change anything else.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Resume</title>
+
+  <!-- Links the design file. Keep style.css in the same folder as this file. -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="page-wrapper">
+
+    <!-- SCREEN-ONLY AREA: the button and the warning are hidden when printing -->
+    <div class="toolbar no-print">
+      <button id="printButton" class="print-button" type="button">Download / Save as PDF</button>
+
+      <!-- Shown automatically only when the resume is longer than one A4 page -->
+      <p id="pageWarning" class="page-warning" role="alert" hidden>
+        Warning: your resume is longer than one A4 page. Please shorten some text
+        (for example, remove a project or shorten descriptions) before printing.
+        Nothing has been hidden or cut.
+      </p>
+    </div>
+
+    <!-- The resume itself. JavaScript fills this container automatically. -->
+    <article id="resume" class="resume theme-1" aria-label="Student resume"></article>
+
+  </div>
+
+  <script>
+  /*
+  ========================================
+  STUDENT RESUME CONFIGURATION
+  ========================================
+
+  AVAILABLE THEMES:
+
+  1 - Professional Blue
+  2 - Modern Dark
+  3 - Minimal White
+  4 - Elegant Purple
+  5 - Corporate Green
+
+  TO CHANGE THE THEME:
+  Change the SELECTED_THEME number below.
+
+  Example:
+  const SELECTED_THEME = 3;
+
+  ========================================
+  */
+
+  const SELECTED_THEME = 1;
+
+
+  /*
+  ========================================
+  STUDENT INFORMATION  (EDIT THIS PART)
+  ========================================
+  Rules for editing:
+  - Keep the quotation marks "like this" around text.
+  - Keep the commas at the end of each line.
+  - To add another item (skill, project, etc.), copy one full entry
+    (from { to },) and paste it below, then change the text.
+  - To remove an item, delete its whole entry.
+  - To hide a whole section, leave it empty: [] for lists or "" for text.
+  ========================================
+  */
+
+  const student = {
+    name: "Arun Kumar",
+    designation: "Computer Science Student",
+    phone: "+91 9876543210",
+    email: "arun@gmail.com",
+    location: "Chennai, Tamil Nadu",
+    linkedin: "https://linkedin.com/in/example",
+    github: "https://github.com/example",
+
+    careerObjective: "Motivated student seeking an opportunity to apply technical knowledge and develop professional skills.",
+
+    education: [
+      {
+        degree: "B.Sc Computer Science",
+        institution: "ABC Arts and Science College",
+        year: "2024 - 2027",
+        score: "8.5 CGPA"
+      },
+      {
+        degree: "Higher Secondary (HSC)",
+        institution: "XYZ Matriculation Higher Secondary School",
+        year: "2022 - 2024",
+        score: "88%"
+      }
+    ],
+
+    technicalSkills: [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "Python",
+      "MySQL"
+    ],
+
+    projects: [
+      {
+        title: "Student Management System",
+        description: "Developed a student management application.",
+        technologies: ["HTML", "CSS", "JavaScript", "MySQL"]
+      },
+      {
+        title: "Personal Portfolio Website",
+        description: "Designed a responsive portfolio website to showcase academic work.",
+        technologies: ["HTML", "CSS"]
+      }
+    ],
+
+    certifications: [
+      {
+        name: "Python Programming",
+        organization: "XYZ Institute",
+        year: "2026"
+      }
+    ],
+
+    achievements: [
+      "Participated in inter-college technical events."
+    ],
+
+    languages: [
+      "Tamil",
+      "English"
+    ]
+  };
+
+
+  /*
+  ========================================
+  EVERYTHING BELOW THIS LINE WORKS AUTOMATICALLY.
+  YOU DO NOT NEED TO EDIT IT.
+  ========================================
+  */
+
+
+  /* ========================================
+     THEME MANAGEMENT
+     ========================================
+     To add Theme 6 in the future:
+       1. Add ".theme-6" colours in style.css.
+       2. Add its name to the theme list comment at the top of this script.
+       3. Add the number 6 to the list below: [1, 2, 3, 4, 5, 6]
+  */
+  const VALID_THEMES = [1, 2, 3, 4, 5];
+  const DEFAULT_THEME = 1;
+
+  // Checks the chosen number and returns the matching CSS class name.
+  // An invalid number (like 99 or "abc") falls back to Theme 1.
+  function getThemeClass() {
+    const themeNumber = Number(SELECTED_THEME);
+    const isValid = VALID_THEMES.includes(themeNumber);
+    return "theme-" + (isValid ? themeNumber : DEFAULT_THEME);
+  }
+
+
+  /* ========================================
+     SMALL HELPER FUNCTIONS
+     ======================================== */
+
+  // True when the value is a non-empty piece of text.
+  function hasText(value) {
+    return typeof value === "string" && value.trim() !== "";
+  }
+
+  // Returns a list containing only the non-empty text items.
+  function cleanTextList(list) {
+    return Array.isArray(list) ? list.filter(hasText) : [];
+  }
+
+  // Creates an HTML element. Text is added with textContent, which is safe.
+  function createElement(tagName, className, text) {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (text !== undefined && text !== null) element.textContent = text;
+    return element;
+  }
+
+  // Only allows web addresses starting with http:// or https://.
+  // Returns the safe address, or null when it is not valid.
+  function getSafeUrl(url) {
+    if (!hasText(url)) return null;
+    try {
+      const parsed = new URL(url.trim());
+      if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+        return parsed.href;
+      }
+    } catch (error) {
+      // Not a valid address; fall through and return null.
+    }
+    return null;
+  }
+
+  // Very simple email check (text@text.text).
+  function isValidEmail(email) {
+    return hasText(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  // Creates a clickable link element.
+  function createLink(text, href) {
+    const link = createElement("a", "", text);
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    return link;
+  }
+
+  // Makes a section with a heading. The section is added to the page only
+  // if it receives content, so empty sections are hidden automatically.
+  function createSection(title) {
+    const section = createElement("section", "resume-section");
+    section.appendChild(createElement("h2", "section-heading", title));
+    return section;
+  }
+
+  // Makes a row with text on the left and text on the right (e.g. degree + year).
+  function createRow(leftText, rightText, leftClass) {
+    const row = createElement("div", "entry-row");
+    row.appendChild(createElement("span", leftClass || "entry-title", leftText));
+    if (hasText(rightText)) row.appendChild(createElement("span", "entry-date", rightText));
+    return row;
+  }
+
+  // Makes an inline list such as skills or languages.
+  function createInlineList(items) {
+    const list = createElement("ul", "inline-list");
+    items.forEach(function (item) {
+      list.appendChild(createElement("li", "", item));
+    });
+    return list;
+  }
+
+
+  /* ========================================
+     RESUME RENDERING
+     Each function below builds one part of the resume.
+     A function returns null when there is nothing to show.
+     ======================================== */
+
+  // Top of the resume: the name and designation.
+  function buildHeader() {
+    const header = createElement("header", "resume-header");
+    header.appendChild(createElement("h1", "student-name", hasText(student.name) ? student.name : "Your Name"));
+    if (hasText(student.designation)) {
+      header.appendChild(createElement("p", "student-designation", student.designation));
+    }
+    return header;
+  }
+
+  // 1. Personal Details (contact information)
+  function buildPersonalDetails() {
+    const list = createElement("ul", "contact-list");
+
+    function addContact(label, content) {
+      const item = createElement("li", "contact-item");
+      item.appendChild(createElement("span", "contact-label", label + ": "));
+      item.appendChild(content);
+      list.appendChild(item);
+    }
+
+    if (hasText(student.phone)) {
+      // Keep only digits and "+" for the phone link.
+      const phoneDigits = student.phone.replace(/[^\d+]/g, "");
+      addContact("Phone", phoneDigits ? createLink(student.phone, "tel:" + phoneDigits) : document.createTextNode(student.phone));
+    }
+    if (hasText(student.email)) {
+      addContact("Email", isValidEmail(student.email) ? createLink(student.email, "mailto:" + student.email.trim()) : document.createTextNode(student.email));
+    }
+    if (hasText(student.location)) {
+      addContact("Location", document.createTextNode(student.location));
+    }
+
+    const linkedinUrl = getSafeUrl(student.linkedin);
+    if (linkedinUrl) addContact("LinkedIn", createLink(linkedinUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""), linkedinUrl));
+
+    const githubUrl = getSafeUrl(student.github);
+    if (githubUrl) addContact("GitHub", createLink(githubUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""), githubUrl));
+
+    if (list.children.length === 0) return null;
+    const section = createSection("Personal Details");
+    section.appendChild(list);
+    return section;
+  }
+
+  // 2. Career Objective
+  function buildCareerObjective() {
+    if (!hasText(student.careerObjective)) return null;
+    const section = createSection("Career Objective");
+    section.appendChild(createElement("p", "", student.careerObjective));
+    return section;
+  }
+
+  // 3. Education (supports many entries)
+  function buildEducation() {
+    const entries = (Array.isArray(student.education) ? student.education : [])
+      .filter(function (e) { return e && (hasText(e.degree) || hasText(e.institution)); });
+    if (entries.length === 0) return null;
+
+    const section = createSection("Education");
+    entries.forEach(function (e) {
+      const entry = createElement("div", "entry");
+      entry.appendChild(createRow(e.degree || e.institution, e.year));
+      if (hasText(e.degree) && hasText(e.institution)) {
+        entry.appendChild(createElement("p", "entry-detail", e.institution));
+      }
+      if (hasText(e.score)) entry.appendChild(createElement("p", "entry-detail", "Score: " + e.score));
+      section.appendChild(entry);
+    });
+    return section;
+  }
+
+  // 4. Technical Skills
+  function buildSkills() {
+    const skills = cleanTextList(student.technicalSkills);
+    if (skills.length === 0) return null;
+    const section = createSection("Technical Skills");
+    section.appendChild(createInlineList(skills));
+    return section;
+  }
+
+  // 5. Projects (supports many entries)
+  function buildProjects() {
+    const entries = (Array.isArray(student.projects) ? student.projects : [])
+      .filter(function (p) { return p && hasText(p.title); });
+    if (entries.length === 0) return null;
+
+    const section = createSection("Projects");
+    entries.forEach(function (p) {
+      const entry = createElement("div", "entry");
+      entry.appendChild(createRow(p.title, ""));
+      if (hasText(p.description)) entry.appendChild(createElement("p", "entry-detail", p.description));
+      const tech = cleanTextList(p.technologies);
+      if (tech.length > 0) entry.appendChild(createElement("p", "entry-detail", "Technologies: " + tech.join(", ")));
+      section.appendChild(entry);
+    });
+    return section;
+  }
+
+  // 6. Certifications (supports many entries)
+  function buildCertifications() {
+    const entries = (Array.isArray(student.certifications) ? student.certifications : [])
+      .filter(function (c) { return c && hasText(c.name); });
+    if (entries.length === 0) return null;
+
+    const section = createSection("Certifications");
+    entries.forEach(function (c) {
+      const entry = createElement("div", "entry");
+      entry.appendChild(createRow(c.name, c.year));
+      if (hasText(c.organization)) entry.appendChild(createElement("p", "entry-detail", c.organization));
+      section.appendChild(entry);
+    });
+    return section;
+  }
+
+  // 7. Achievements
+  function buildAchievements() {
+    const items = cleanTextList(student.achievements);
+    if (items.length === 0) return null;
+    const section = createSection("Achievements");
+    const list = createElement("ul", "bullet-list");
+    items.forEach(function (text) { list.appendChild(createElement("li", "", text)); });
+    section.appendChild(list);
+    return section;
+  }
+
+  // 8. Languages
+  function buildLanguages() {
+    const languages = cleanTextList(student.languages);
+    if (languages.length === 0) return null;
+    const section = createSection("Languages");
+    section.appendChild(createInlineList(languages));
+    return section;
+  }
+
+  // Builds the whole resume in the required order.
+  function renderResume() {
+    const resume = document.getElementById("resume");
+    resume.textContent = "";                              // clear old content
+    resume.className = "resume " + getThemeClass();       // apply the theme
+
+    if (hasText(student.name)) document.title = student.name + " - Resume";
+
+    const parts = [
+      buildHeader(),
+      buildPersonalDetails(),
+      buildCareerObjective(),
+      buildEducation(),
+      buildSkills(),
+      buildProjects(),
+      buildCertifications(),
+      buildAchievements(),
+      buildLanguages()
+    ];
+
+    // Empty sections return null and are skipped here (hidden automatically).
+    parts.forEach(function (part) { if (part) resume.appendChild(part); });
+  }
+
+
+  /* ========================================
+     ONE-PAGE CHECK (screen only)
+     Compares the resume height with one A4 page and shows a warning
+     if it is too long. It never hides or cuts any content.
+     The check is approximate and only runs on wider screens.
+     ======================================== */
+  function checkPageFit() {
+    const warning = document.getElementById("pageWarning");
+    const resume = document.getElementById("resume");
+
+    if (window.innerWidth < 800) { warning.hidden = true; return; }
+
+    // Measure how many screen pixels one A4 page (297mm) is.
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:absolute;visibility:hidden;width:1px;height:297mm;";
+    document.body.appendChild(probe);
+    const a4Height = probe.offsetHeight;
+    document.body.removeChild(probe);
+
+    warning.hidden = resume.offsetHeight <= a4Height + 2;
+  }
+
+
+  /* ========================================
+     START-UP
+     ======================================== */
+  document.getElementById("printButton").addEventListener("click", function () {
+    window.print();   // opens the print window; choose "Save as PDF"
+  });
+
+  window.addEventListener("resize", checkPageFit);
+  window.addEventListener("load", checkPageFit);
+
+  renderResume();
+  checkPageFit();
+  </script>
+
+</body>
+</html>
